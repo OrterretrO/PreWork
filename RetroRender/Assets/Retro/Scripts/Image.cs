@@ -9,50 +9,57 @@ namespace Retro
 {
     public class Image : IDisposable
     {
-        private readonly int _width;
-        private readonly int _height;
-        public int Width => _width;
-        public int Height => _height;
+        private readonly int m_width;
+        private readonly int m_height;
+        public int Width => m_width;
+        public int Height => m_height;
 
         internal RenderTexture InternalRtx;
         internal Texture2D InternalTex;
+
+
+        private bool m_onDraw = false;
+        private ImageDrawList m_drawList = new ImageDrawList();
 
         public Texture NativeTexture => InternalRtx == null ? InternalTex as Texture : InternalRtx;
 
         public Image(Texture2D texture)
         {
-            _width = texture.width;
-            _height = texture.height;
+            m_width = texture.width;
+            m_height = texture.height;
 
             InternalTex = texture;
         }
 
         public Image(int width, int height)
         {
-            _width = width;
-            _height = height;
+            m_width = width;
+            m_height = height;
 
             InternalTex = new Texture2D(width, height);
+            InternalTex.filterMode = FilterMode.Point;
             InternalTex.Apply(false, false);
         }
 
-
         public void BeginDraw()
         {
-
+            m_onDraw = true;
+            m_drawList.Reset();
         }
 
         public void EndDraw()
         {
-
+            m_drawList.Submit(this);
+            m_onDraw = false;
         }
 
-        public void SetPixel(int x, int y, Color32 color)
+        public void SetPixel(int x, int y,Color color)
         {
-
+            if (!m_onDraw) throw new Exception("setpixel must be called after BeginDraw()");
+            m_drawList.SetPixel(x, y, color);
         }
 
-        public void DrawLine(int x1, int y1, int x2, int y2, Color32 color)
+        public void DrawLine(int x1, int y1, int x2, int y2, Color color)
         {
 
         }
@@ -72,6 +79,8 @@ namespace Retro
             if (InternalRtx == null)
             {
                 InternalRtx = RenderTexture.GetTemporary(Width, Height);
+                InternalRtx.antiAliasing = 1;
+                InternalRtx.filterMode = FilterMode.Point;
                 Graphics.Blit(InternalTex, InternalRtx);
             }
         }

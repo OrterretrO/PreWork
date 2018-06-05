@@ -8,11 +8,11 @@ public class RetroSample : MonoBehaviour
 {
 
 
-    private FrameBuffer _framebuffer;
+    private FrameBuffer m_framebuffer;
 
-    public MeshRenderer _meshRender;
+    public MeshRenderer m_meshRender;
 
-    private Image _textImg;
+    private Image m_textImg;
 
     private void Awake()
     {
@@ -21,35 +21,53 @@ public class RetroSample : MonoBehaviour
 
     private void OnDestroy()
     {
-        _framebuffer.Dispose();
+        m_framebuffer.Dispose();
         GraphicContext.Release();
     }
 
     void Start()
     {
-        _framebuffer = new FrameBuffer(400, 300);
+        m_framebuffer = new FrameBuffer(120, 90);
         var color = new Color(Random.value, Random.value, Random.value);
-        _framebuffer.Buffer.Clear(color);
+        m_framebuffer.Buffer.Clear(color);
 
-        _meshRender.material.mainTexture = _framebuffer.Buffer.NativeTexture;
+        m_meshRender.material.mainTexture = m_framebuffer.Buffer.NativeTexture;
 
-        _textImg = new Image(30, 10);
+        m_textImg = new Image(30, 10);
 
     }
 
     void Update()
     {
 
+        //Sample1();
+        Sample2();
+
+        m_framebuffer.Swap();
+        m_meshRender.material.mainTexture = m_framebuffer.Buffer.NativeTexture;
+    }
+
+    private void Sample1()
+    {
         var posx = Mathf.FloorToInt(Random.value * 400);
         var posy = Mathf.FloorToInt(Random.value * 300);
 
-        _framebuffer.Buffer.DrawImage(
-            _textImg,
+        m_framebuffer.Buffer.DrawImage(
+            m_textImg,
             new Rectangle(0, 0, 10, 10),
             new Rectangle(posx, posy, 10, 10)
-            );
+        );
+    }
 
-        _framebuffer.Swap();
-        _meshRender.material.mainTexture = _framebuffer.Buffer.NativeTexture;
+    private void Sample2()
+    {
+        var buffer = m_framebuffer.Buffer;
+        buffer.BeginDraw();
+
+        for (var i = 0; i < 100; i++)
+        {
+            buffer.SetPixel(Mathf.FloorToInt(Random.value * 120), Mathf.FloorToInt(Random.value * 90), Color.blue);
+        }
+        buffer.EndDraw();
     }
 }

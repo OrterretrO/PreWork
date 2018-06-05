@@ -10,16 +10,38 @@ namespace Retro
         private static Material s_matColor;
         private static int s_shaderIdColor;
 
+        private static Material s_matPixel;
+        private static ComputeBuffer s_bufferPoints;
+        private static ComputeBuffer s_bufferColor;
+        private static int s_shaderIdBufferPointer;
+        private static int s_shaderIdBufferColors;
+
+        private static int s_shaderIdImageSize;
+
         public static void Init()
         {
             var shader = Shader.Find("Retro/Color");
             s_matColor = new Material(shader);
             s_shaderIdColor = Shader.PropertyToID("_Color");
+
+
+            var pixelshader = Shader.Find("Retro/Pixel");
+            s_matPixel = new Material(pixelshader);
+            s_shaderIdBufferPointer = Shader.PropertyToID("points");
+            s_shaderIdBufferColors = Shader.PropertyToID("colors");
+            s_bufferPoints = new ComputeBuffer(512,sizeof(float) *2, ComputeBufferType.Default);
+            s_bufferColor = new ComputeBuffer(512, sizeof(float) * 4, ComputeBufferType.Default);
+            s_matPixel.SetBuffer(s_shaderIdBufferPointer, s_bufferPoints);
+            s_matPixel.SetBuffer(s_shaderIdBufferColors, s_bufferColor);
+
+            s_shaderIdImageSize = Shader.PropertyToID("imgsize");
+
         }
 
         public static void Release()
         {
-
+            s_bufferPoints?.Release();
+            s_bufferColor?.Release();
         }
 
         public static void Release(Image img)
@@ -37,6 +59,22 @@ namespace Retro
 
             s_matColor.SetColor(s_shaderIdColor, color);
             Graphics.Blit(null,img.InternalRtx, s_matColor);
+        }
+
+        public static void DrawPixels(Image img, List<Vector2> vert, List<Color> col)
+        {
+            if (vert.Count > 512) throw new System.Exception("SetPixel batch size exceeded!");
+
+            s_bufferPoints.SetData(vert, 0, 0, vert.Count);
+            s_bufferColor.SetData(col, 0, 0, col.Count);
+
+            img.InternalCheckTexture();
+
+            Graphics.SetRenderTarget(img.InternalRtx);
+            s_matPixel.SetVector(s_shaderIdImageSize, new Vector4(img.Width, img.Height, 0, 0));
+            s_matPixel.SetPass(0);
+            Graphics.DrawProcedural(MeshTopology.Points, vert.Count);
+
         }
 
         public static void ImageDraw(Image dstimg, Image srcimg, Rectangle src, Rectangle dst)
