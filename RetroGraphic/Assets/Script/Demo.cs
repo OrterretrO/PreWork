@@ -11,7 +11,7 @@ public class Demo : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
-        m_graph = TextureGraph.Create(120, 90);
+        m_graph = RetroGraphCreator.InitGraph(120, 90, eGraphType.Texture);
 
         m_image = m_graph.CreateFrameBuff(10, 10);
 
