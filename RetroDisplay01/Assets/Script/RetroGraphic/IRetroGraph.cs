@@ -11,7 +11,7 @@ namespace Retro
     }
 
 
-    public interface IRetroGraphic
+    public interface IRetroGraph
     {
         FrameBuff CreateFrameBuff(int width, int height);
 

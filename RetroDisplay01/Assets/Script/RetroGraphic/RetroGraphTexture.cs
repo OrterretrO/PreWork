@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Retro
 {
 
-    public class GraphicInterface : IRetroGraphic
+    public class TextureGraph : IRetroGraph
     {
         /// <summary>
         /// 创建一个GraphicInterface对象
@@ -12,7 +12,7 @@ namespace Retro
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns></returns>
-        static public GraphicInterface Create(int width, int height)
+        static public TextureGraph Create(int width, int height)
         {
             Texture2D texture = new Texture2D(width, height, TextureFormat.RGB24, false);
             texture.filterMode = FilterMode.Point;
@@ -27,16 +27,16 @@ namespace Retro
             spriteRender.flipY = true;
             spriteRender.sprite = Sprite.Create(texture, new Rect(Vector2.zero, new Vector2(width, height)), new Vector2(0.5f, 0.5f), 1);
 
-            return new GraphicInterface(texture);
+            return new TextureGraph(texture);
         }
 
 
         private Texture2D m_texture;
 
 
-        private GraphicInterface() { }
+        private TextureGraph() { }
 
-        private GraphicInterface(Texture2D texture) { m_texture = texture; }
+        private TextureGraph(Texture2D texture) { m_texture = texture; }
 
         /// <summary>
         /// 创建图形缓冲
